@@ -2,19 +2,36 @@ package main
 
 import (
 	"log"
-	"os"
 
 	smtp "github.com/emersion/go-smtp"
+	"github.com/kelseyhightower/envconfig"
 
 	"github.com/teran/mail-relay/backend/mailgun"
 )
 
+type config struct {
+	Addr              string `default:":25"`
+	AllowInsecureAuth bool   `default:"false" envconfig:"ALLOW_INSECURE_AUTH"`
+	AuthDisabled      bool   `default:"false" envconfig:"AUTH_DISABLED"`
+	Domain            string `required:"true"`
+	MailgunPrivateKey string `required:"true" envconfig:"MAILGUN_PRIVATE_KEY"`
+	MailgunPublicKey  string `required:"true" envconfig:"MAILGUN_PUBLIC_KEY"`
+	MaxIdleSeconds    int    `default:"300" envconfig:"MAX_IDLE_SECONDS"`
+	MaxMessageBytes   int    `default:"1048576" envconfig:"MAX_MESSAGE_BYTES"`
+	MaxRecipients     int    `default:"50" envconfig:"MAX_RECIPIENTS"`
+}
+
 func main() {
-	relayDomain := os.Getenv("RELAY_DOMAIN")
+	var cfg config
+	err := envconfig.Process("RELAY", &cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	be, err := mailgun.NewBackend(
-		relayDomain,
-		os.Getenv("MAILGUN_PRIVATE_KEY"),
-		os.Getenv("MAILGUN_PUBLIC_KEY"),
+		cfg.Domain,
+		cfg.MailgunPrivateKey,
+		cfg.MailgunPublicKey,
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -22,13 +39,13 @@ func main() {
 
 	s := smtp.NewServer(be)
 
-	s.Addr = ":25"
-	s.Domain = relayDomain
-	s.MaxIdleSeconds = 300
-	s.MaxMessageBytes = 1024 * 1024
-	s.MaxRecipients = 50
-	s.AuthDisabled = true
-	s.AllowInsecureAuth = true
+	s.Addr = cfg.Addr
+	s.Domain = cfg.Domain
+	s.MaxIdleSeconds = cfg.MaxIdleSeconds
+	s.MaxMessageBytes = cfg.MaxMessageBytes
+	s.MaxRecipients = cfg.MaxRecipients
+	s.AuthDisabled = cfg.AuthDisabled
+	s.AllowInsecureAuth = cfg.AllowInsecureAuth
 
 	log.Println("Starting server at", s.Addr)
 	if err := s.ListenAndServe(); err != nil {
