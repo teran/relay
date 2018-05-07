@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/mail"
 
 	smtp "github.com/emersion/go-smtp"
 	mg "gopkg.in/mailgun/mailgun-go.v1"
@@ -49,18 +50,23 @@ func (b *Backend) AnonymousLogin() (smtp.User, error) {
 }
 
 func (u *User) Send(from string, to []string, r io.Reader) error {
-	mBody, err := ioutil.ReadAll(r)
+	m, err := mail.ReadMessage(r)
+	if err != nil {
+		return err
+	}
+
+	mBody, err := ioutil.ReadAll(m.Body)
 	if err != nil {
 		return err
 	}
 
 	for _, recipient := range to {
-		message := u.mailgunClient.NewMessage(from, "subject", string(mBody), recipient)
+		message := u.mailgunClient.NewMessage(from, m.Header.Get("Subject"), string(mBody), recipient)
 		resp, id, err := u.mailgunClient.Send(message)
 		if err != nil {
 			return err
 		}
-		log.Printf("ID: %s Resp: %s\n", id, resp)
+		log.Printf("ID: %s Resp: %s", id, resp)
 	}
 	return nil
 }
