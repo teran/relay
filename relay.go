@@ -6,7 +6,7 @@ import (
 	smtp "github.com/emersion/go-smtp"
 	"github.com/kelseyhightower/envconfig"
 
-	"github.com/teran/mail-relay/backend/mailgun"
+	"github.com/teran/relay/backend/mailgun"
 )
 
 type config struct {
