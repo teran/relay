@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "Post push hook running"
+
+docker push $DOCKER_REPO
