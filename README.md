@@ -10,5 +10,5 @@ docker run -it \
   -e RELAY_DOMAIN="<domain>" \
   -e MAILGUN_PRIVATE_KEY="<mailgun private key>" \
   -e MAILGUN_PUBLIC_KEY="<mailgun public key>" \
-  teran/mail-relay
+  teran/relay
 ```
