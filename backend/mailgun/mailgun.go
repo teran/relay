@@ -14,7 +14,7 @@ import (
 var _ smtp.Backend = &Backend{}
 var _ smtp.User = &User{}
 
-// Mail Backend
+// Backend type
 type Backend struct {
 	Domain     string
 	privateKey string
