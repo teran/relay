@@ -12,7 +12,8 @@
 SMTP server to use for forwarding messages via HTTP-based services in environments not supporting SMTP outbound directly
 
 # How this works
-relay accepts SMTP connection to handle message with invoking Mailgun API with the message it got. Simply :)
+Relay accepts SMTP connection to handle message with invoking Mailgun API with the message it got. Simply :)
+In depth in current implementation relay sends message synchronously via Mailgun Go's client.
 
 # How to use
 ```
