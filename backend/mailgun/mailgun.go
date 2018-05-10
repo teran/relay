@@ -78,7 +78,7 @@ func (u *User) Send(from string, to []string, r io.Reader) error {
 	return nil
 }
 
-// Logout is calle after all operations are complete within the session
+// Logout is called after all operations are complete within the session
 // Here in relay there's no need to implement anything special for that
 func (u *User) Logout() error {
 	return nil
