@@ -19,6 +19,7 @@ type config struct {
 	MaxIdleSeconds    int    `default:"300" envconfig:"MAX_IDLE_SECONDS"`
 	MaxMessageBytes   int    `default:"1048576" envconfig:"MAX_MESSAGE_BYTES"`
 	MaxRecipients     int    `default:"50" envconfig:"MAX_RECIPIENTS"`
+	MetricsAddr       string `default:":8081" envconfig:"METRICS_ADDR"`
 }
 
 func main() {
@@ -46,6 +47,10 @@ func main() {
 	s.MaxRecipients = cfg.MaxRecipients
 	s.AuthDisabled = cfg.AuthDisabled
 	s.AllowInsecureAuth = cfg.AllowInsecureAuth
+
+	go func(metricsAddr string) {
+		log.Fatal(be.(*mailgun.Backend).ListenAndServeMetrics(metricsAddr))
+	}(cfg.MetricsAddr)
 
 	log.Println("Starting server at", s.Addr)
 	if err := s.ListenAndServe(); err != nil {
