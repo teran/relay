@@ -55,7 +55,6 @@ func (b *Backend) AnonymousLogin() (smtp.User, error) {
 }
 
 // Send will send email synchronously via Mailgun service
-// TODO: Send messages via queue
 func (u *User) Send(from string, to []string, r io.Reader) error {
 	m, err := mail.ReadMessage(r)
 	if err != nil {
