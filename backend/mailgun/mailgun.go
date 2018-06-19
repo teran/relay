@@ -7,10 +7,12 @@ import (
 	"log"
 	"net/http"
 	"net/mail"
+	"strings"
 
 	smtp "github.com/emersion/go-smtp"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"golang.org/x/net/html"
 	mg "gopkg.in/mailgun/mailgun-go.v1"
 )
 
@@ -92,9 +94,22 @@ func (u *User) Send(from string, to []string, r io.Reader) error {
 		return err
 	}
 
+	mBodyString := string(mBody)
+	var (
+		mBodyText string
+		mBodyHTML string
+	)
+
+	_, err = html.Parse(strings.NewReader(mBodyString))
+	if err == nil {
+		mBodyHTML = mBodyString
+	} else {
+		mBodyText = mBodyString
+	}
+
 	for _, recipient := range to {
-		message := u.mailgunClient.NewMessage(from, m.Header.Get("Subject"), string(mBody), recipient)
-		message.SetHtml(string(mBody))
+		message := u.mailgunClient.NewMessage(from, m.Header.Get("Subject"), mBodyText, recipient)
+		message.SetHtml(mBodyHTML)
 		resp, id, err := u.mailgunClient.Send(message)
 		if err != nil {
 			u.metricsMailgunMessages.WithLabelValues("fail").Inc()
