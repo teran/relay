@@ -80,6 +80,15 @@
   revision = "8b1c2da0d56deffdbb9e48d4414b4e674bd8083e"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = [
+    "html",
+    "html/atom"
+  ]
+  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
+
+[[projects]]
   name = "gopkg.in/mailgun/mailgun-go.v1"
   packages = ["."]
   revision = "a4002e2df2e8ca2da6a6fbb4a72871b504e49f50"
@@ -88,6 +97,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5910cc6e70ed6cd992a875f76dc6c430b48ca6a515c3c06bb9481757b4acee1e"
+  inputs-digest = "a886126bb1de8141c72b0850109b69c9fd68386ce2b90e99ea4127550945dc7e"
   solver-name = "gps-cdcl"
   solver-version = 1
