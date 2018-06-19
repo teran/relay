@@ -94,6 +94,7 @@ func (u *User) Send(from string, to []string, r io.Reader) error {
 
 	for _, recipient := range to {
 		message := u.mailgunClient.NewMessage(from, m.Header.Get("Subject"), string(mBody), recipient)
+		message.SetHtml(string(mBody))
 		resp, id, err := u.mailgunClient.Send(message)
 		if err != nil {
 			u.metricsMailgunMessages.WithLabelValues("fail").Inc()
