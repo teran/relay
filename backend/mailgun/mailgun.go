@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/mail"
-	"strings"
 
 	smtp "github.com/emersion/go-smtp"
 	"github.com/prometheus/client_golang/prometheus"
@@ -83,18 +81,8 @@ func (b *Backend) ListenAndServeMetrics(addr string) error {
 
 // Send will send email synchronously via Mailgun service
 func (u *User) Send(from string, to []string, r io.Reader) error {
-	m, err := mail.ReadMessage(r)
-	if err != nil {
-		return err
-	}
-
-	mBody, err := ioutil.ReadAll(m.Body)
-	if err != nil {
-		return err
-	}
-
 	for _, recipient := range to {
-		message := mg.NewMIMEMessage(ioutil.NopCloser(strings.NewReader(string(mBody))), recipient)
+		message := mg.NewMIMEMessage(ioutil.NopCloser(r), recipient)
 		resp, id, err := u.mailgunClient.Send(message)
 		if err != nil {
 			u.metricsMailgunMessages.WithLabelValues("fail").Inc()
