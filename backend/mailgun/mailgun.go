@@ -13,8 +13,10 @@ import (
 	mg "gopkg.in/mailgun/mailgun-go.v1"
 )
 
-var _ smtp.Backend = &Backend{}
-var _ smtp.User = &User{}
+var (
+	_ smtp.Backend = (*Backend)(nil)
+	_ smtp.User    = (*User)(nil)
+)
 
 // Backend type
 type Backend struct {
