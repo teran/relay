@@ -18,9 +18,9 @@ Go's client.
 
 ```shell
 docker run -it \
-  -e MG_API_KEY="<MAILGUN_API_KEY> \
-  -e MG_DOMAIN="<domain>" \
-  -e MG_URL="<url>" \
+  -e RELAY_MAILGUN_API_KEY="<MAILGUN_API_KEY> \
+  -e RELAY_DOMAIN="<domain>" \
+  -e RELAY_MAILGUN_URL="<url>" \
   -e RELAY_ADDR=:25 \
   -e RELAY_MAX_IDLE_SECONDS=300 \
   -e RELAY_MAX_MESSAGE_BYTES=1048576 \

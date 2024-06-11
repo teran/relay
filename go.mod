@@ -3,10 +3,12 @@ module github.com/teran/relay
 go 1.22.4
 
 require (
-	github.com/emersion/go-smtp v0.0.0-20180503081130-592cbda523fa
+	github.com/emersion/go-smtp v0.21.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mailgun/mailgun-go/v4 v4.12.0
 	github.com/prometheus/client_golang v1.19.1
+	github.com/sirupsen/logrus v1.9.3
+	golang.org/x/sync v0.3.0
 )
 
 require (
@@ -23,7 +25,6 @@ require (
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/stretchr/testify v1.5.1 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )
