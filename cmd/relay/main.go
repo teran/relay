@@ -5,6 +5,7 @@ import (
 
 	smtp "github.com/emersion/go-smtp"
 	"github.com/kelseyhightower/envconfig"
+	mg "github.com/mailgun/mailgun-go/v4"
 
 	"github.com/teran/relay/backend/mailgun"
 )
@@ -29,11 +30,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	be, err := mailgun.NewBackend(
-		cfg.Domain,
-		cfg.MailgunPrivateKey,
-		cfg.MailgunPublicKey,
-	)
+	mgDriver, err := mg.NewMailgunFromEnv()
+	if err != nil {
+		panic(err)
+	}
+	be, err := mailgun.NewBackend(mgDriver)
 	if err != nil {
 		log.Fatal(err)
 	}
