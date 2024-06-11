@@ -1,18 +1,14 @@
-FROM golang
+FROM alpine:3.20.0 AS certificates
 
-ADD . /go/src/github.com/teran/relay
-RUN cd /go/src/github.com/teran/relay && CGO_ENABLED=0 go build -o bin/relay .
+RUN apk add --update --no-cache \
+  ca-certificates=20240226-r0
 
-FROM alpine
-
-ARG VCS_REF
+FROM scratch
 
 LABEL org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url="https://github.com/teran/relay"
 
-RUN apk add --update --no-cache \
-  ca-certificates && \
-  rm -vf /var/cache/apk/*
-COPY --from=0 /go/src/github.com/teran/relay/bin/relay /relay
+COPY --from=certificates /etc/ssl/cert.pem /etc/ssl/cert.pem
+COPY --chmod=0755 --chown=root:root dist/relay_linux_amd64_v3/relay /relay
 
-ENTRYPOINT ["/relay"]
+ENTRYPOINT [ "/relay" ]

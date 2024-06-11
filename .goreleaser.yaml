@@ -1,0 +1,28 @@
+---
+version: 2
+builds:
+  - id: relay
+    main: ./cmd/relay
+    binary: relay
+    ldflags:
+      - -s -w -X main.appVersion={{.Version}} -X main.buildTimestamp={{.Date}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - freebsd
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    goamd64: ["v1", "v2", "v3"]
+    goarm: ["7"]
+    mod_timestamp: "{{ .CommitTimestamp }}"
+archives:
+  - format: binary
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+  split: false
+  disable: false
