@@ -13,7 +13,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/teran/relay/driver/mailgun"
-	"github.com/teran/relay/smtp/backend"
+	smtpWrapper "github.com/teran/relay/smtp"
 )
 
 var (
@@ -55,7 +55,7 @@ func main() {
 	mg.SetAPIBase(cfg.MailgunURL)
 
 	dr := mailgun.New(mg)
-	be := backend.New(ctx, dr)
+	be := smtpWrapper.NewBackend(ctx, dr)
 
 	s := smtp.NewServer(be)
 

@@ -11,11 +11,16 @@ import (
 	"github.com/teran/relay/driver"
 )
 
-type mailgun struct {
-	client mg.Mailgun
+type MailgunImpl interface {
+	NewMIMEMessage(body io.ReadCloser, to ...string) *mg.Message
+	Send(ctx context.Context, m *mg.Message) (string, string, error)
 }
 
-func New(client mg.Mailgun) driver.Driver {
+type mailgun struct {
+	client MailgunImpl
+}
+
+func New(client MailgunImpl) driver.Driver {
 	return &mailgun{
 		client: client,
 	}
@@ -25,16 +30,19 @@ func (u *mailgun) Send(ctx context.Context, from string, to []string, r io.Reade
 	for _, recipient := range to {
 		message := u.client.NewMIMEMessage(io.NopCloser(r), recipient)
 		resp, id, err := u.client.Send(ctx, message)
+
 		log.WithFields(log.Fields{
 			"driver":   "mailgun",
 			"id":       id,
 			"response": resp,
 			"error":    err,
 		}).Infof("Attempting to send mail")
+
 		if err != nil {
 			mgMessagesCount.WithLabelValues("failed").Inc()
 			return errors.Wrap(err, "error sending mail")
 		}
+
 		mgMessagesCount.WithLabelValues("success").Inc()
 	}
 	return nil

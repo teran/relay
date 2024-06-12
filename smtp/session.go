@@ -1,4 +1,4 @@
-package session
+package smtp
 
 import (
 	"bytes"
@@ -11,9 +11,7 @@ import (
 	"github.com/teran/relay/driver"
 )
 
-var _ Session = (*session)(nil)
-
-type Session = smtp.Session
+var _ smtp.Session = (*session)(nil)
 
 type session struct {
 	from string
@@ -24,7 +22,7 @@ type session struct {
 	d   driver.Driver
 }
 
-func New(ctx context.Context, d driver.Driver) Session {
+func newSession(ctx context.Context, d driver.Driver) smtp.Session {
 	return &session{
 		ctx: ctx,
 		d:   d,
@@ -40,7 +38,15 @@ func (s *session) Logout() error {
 		"to":   s.to,
 		"body": string(s.body),
 	}).Debugf("on logout")
-	return s.d.Send(s.ctx, s.from, s.to, bytes.NewReader(s.body))
+
+	if s.from != "" && len(s.to) > 0 && len(s.body) > 0 {
+		log.Infof("Sending message to: %#v", s.to)
+		return s.d.Send(s.ctx, s.from, s.to, bytes.NewReader(s.body))
+	}
+
+	log.Info("No data provided: nothing to send")
+
+	return nil
 }
 
 func (s *session) Mail(from string, opts *smtp.MailOptions) error {
