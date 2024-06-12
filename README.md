@@ -25,5 +25,5 @@ docker run -it \
   -e RELAY_MAX_IDLE_SECONDS=300 \
   -e RELAY_MAX_MESSAGE_BYTES=1048576 \
   -e RELAY_MAX_RECIPIENTS=50 \
-  teran/relay
+  ghcr.io/teran/relay:latest
 ```
