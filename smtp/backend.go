@@ -1,4 +1,4 @@
-package backend
+package smtp
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	smtp "github.com/emersion/go-smtp"
 
 	"github.com/teran/relay/driver"
-	"github.com/teran/relay/smtp/session"
 )
 
 type Backend = smtp.Backend
@@ -16,13 +15,13 @@ type backend struct {
 	d   driver.Driver
 }
 
-func New(ctx context.Context, d driver.Driver) Backend {
+func NewBackend(ctx context.Context, d driver.Driver) Backend {
 	return &backend{
 		ctx: ctx,
 		d:   d,
 	}
 }
 
-func (b *backend) NewSession(c *smtp.Conn) (session.Session, error) {
-	return session.New(b.ctx, b.d), nil
+func (b *backend) NewSession(c *smtp.Conn) (smtp.Session, error) {
+	return newSession(b.ctx, b.d), nil
 }
