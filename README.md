@@ -27,3 +27,8 @@ docker run -it \
   -e RELAY_MAX_RECIPIENTS=50 \
   ghcr.io/teran/relay:latest
 ```
+
+RELAY_MAILGUN_URL is an API URL:
+
+* `https://api.eu.mailgun.net/v3` for EU
+* `https://api.mailgun.net/v3` for US
