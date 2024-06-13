@@ -28,7 +28,7 @@ type config struct {
 	AuthDisabled      bool      `envconfig:"AUTH_DISABLED"`
 	Domain            string    `envconfig:"DOMAIN" required:"true"`
 	MailgunAPIKey     string    `envconfig:"MAILGUN_API_KEY" required:"true"`
-	MailgunURL        string    `envconfig:"MAILGUN_URL"`
+	MailgunURL        string    `envconfig:"MAILGUN_URL" required:"true"`
 	MaxMessageBytes   int64     `default:"1048576" envconfig:"MAX_MESSAGE_BYTES"`
 	MaxRecipients     int       `default:"50" envconfig:"MAX_RECIPIENTS"`
 	MetricsAddr       string    `envconfig:"METRICS_ADDR" default:":8081" `
@@ -51,10 +51,10 @@ func main() {
 		"build_timestamp": buildTimestamp,
 	}).Infof("initializing application")
 
-	mg := mg.NewMailgun(cfg.Domain, cfg.MailgunAPIKey)
-	mg.SetAPIBase(cfg.MailgunURL)
+	mgCli := mg.NewMailgun(cfg.Domain, cfg.MailgunAPIKey)
+	mgCli.SetAPIBase(cfg.MailgunURL)
 
-	dr := mailgun.New(mg)
+	dr := mailgun.New(mgCli)
 	be := smtpWrapper.NewBackend(ctx, dr)
 
 	s := smtp.NewServer(be)
