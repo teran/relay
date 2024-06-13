@@ -29,5 +29,6 @@ docker run -it \
 ```
 
 RELAY_MAILGUN_URL is an API URL:
-- `https://api.eu.mailgun.net/v3` for EU
-- `https://api.mailgun.net/v3` for US
+
+* `https://api.eu.mailgun.net/v3` for EU
+* `https://api.mailgun.net/v3` for US
