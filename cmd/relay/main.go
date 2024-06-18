@@ -40,8 +40,8 @@ type config struct {
 	Domain            string    `envconfig:"DOMAIN" required:"true"`
 	MailgunAPIKey     string    `envconfig:"MAILGUN_API_KEY"`
 	MailgunURL        string    `envconfig:"MAILGUN_URL"`
-	MaxMessageBytes   int64     `default:"1048576" envconfig:"MAX_MESSAGE_BYTES"`
-	MaxRecipients     int       `default:"50" envconfig:"MAX_RECIPIENTS"`
+	MaxMessageBytes   int64     `envconfig:"MAX_MESSAGE_BYTES" default:"1048576"`
+	MaxRecipients     int       `envconfig:"MAX_RECIPIENTS" default:"5"`
 	MetricsAddr       string    `envconfig:"METRICS_ADDR" default:":8081" `
 }
 
