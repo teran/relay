@@ -6,13 +6,18 @@ import (
 	"time"
 
 	smtp "github.com/emersion/go-smtp"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/kelseyhightower/envconfig"
 	mg "github.com/mailgun/mailgun-go/v4"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/teran/relay/driver"
 	"github.com/teran/relay/driver/mailgun"
+	"github.com/teran/relay/driver/printer"
 	smtpWrapper "github.com/teran/relay/smtp"
 )
 
@@ -24,19 +29,33 @@ var (
 type config struct {
 	LogLevel          log.Level `envconfig:"LOG_LEVEL" default:"INFO"`
 	Addr              string    `envconfig:"ADDR" default:":25"`
+	Driver            string    `envconfig:"DRIVER" required:"true"`
 	AllowInsecureAuth bool      `envconfig:"ALLOW_INSECURE_AUTH"`
 	AuthDisabled      bool      `envconfig:"AUTH_DISABLED"`
 	Domain            string    `envconfig:"DOMAIN" required:"true"`
-	MailgunAPIKey     string    `envconfig:"MAILGUN_API_KEY" required:"true"`
-	MailgunURL        string    `envconfig:"MAILGUN_URL" required:"true"`
+	MailgunAPIKey     string    `envconfig:"MAILGUN_API_KEY"`
+	MailgunURL        string    `envconfig:"MAILGUN_URL"`
 	MaxMessageBytes   int64     `default:"1048576" envconfig:"MAX_MESSAGE_BYTES"`
 	MaxRecipients     int       `default:"50" envconfig:"MAX_RECIPIENTS"`
 	MetricsAddr       string    `envconfig:"METRICS_ADDR" default:":8081" `
 }
 
+func (c config) Validate() error {
+	return validation.ValidateStruct(&c,
+		validation.Field(&c.Driver, validation.Required, validation.In("mailgun", "printer")),
+		validation.Field(&c.Domain, validation.Required, is.Domain),
+		validation.Field(&c.MailgunAPIKey, validation.When(c.Driver == "mailgun", validation.Required)),
+		validation.Field(&c.MailgunURL, validation.When(c.Driver == "mailgun", validation.Required, is.URL)),
+	)
+}
+
 func main() {
 	var cfg config
 	envconfig.MustProcess("RELAY", &cfg)
+
+	if err := cfg.Validate(); err != nil {
+		panic(err)
+	}
 
 	ctx := context.Background()
 
@@ -51,10 +70,11 @@ func main() {
 		"build_timestamp": buildTimestamp,
 	}).Infof("initializing application")
 
-	mgCli := mg.NewMailgun(cfg.Domain, cfg.MailgunAPIKey)
-	mgCli.SetAPIBase(cfg.MailgunURL)
+	dr, err := newDriver(cfg)
+	if err != nil {
+		panic(err)
+	}
 
-	dr := mailgun.New(mgCli)
 	be := smtpWrapper.NewBackend(ctx, dr)
 
 	s := smtp.NewServer(be)
@@ -80,5 +100,21 @@ func main() {
 
 	if err := g.Wait(); err != nil {
 		panic(err)
+	}
+}
+
+func newDriver(cfg config) (driver.Driver, error) {
+	log.Tracef("mailing driver `%s` requested ...", cfg.Driver)
+
+	switch cfg.Driver {
+	case "mailgun":
+		mgCli := mg.NewMailgun(cfg.Domain, cfg.MailgunAPIKey)
+		mgCli.SetAPIBase(cfg.MailgunURL)
+
+		return mailgun.New(mgCli), nil
+	case "printer":
+		return printer.New(), nil
+	default:
+		return nil, errors.Errorf("unexpected driver: `%s`", cfg.Driver)
 	}
 }

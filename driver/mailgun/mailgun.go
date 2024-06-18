@@ -11,6 +11,8 @@ import (
 	"github.com/teran/relay/driver"
 )
 
+var _ driver.Driver = (*mailgun)(nil)
+
 type MailgunImpl interface {
 	NewMIMEMessage(body io.ReadCloser, to ...string) *mg.Message
 	Send(ctx context.Context, m *mg.Message) (string, string, error)
