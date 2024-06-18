@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 	"time"
 
@@ -29,6 +30,10 @@ var (
 type config struct {
 	LogLevel          log.Level `envconfig:"LOG_LEVEL" default:"INFO"`
 	Addr              string    `envconfig:"ADDR" default:":25"`
+	EnableTLS         bool      `envconfig:"ENABLE_TLS" default:"false"`
+	TLSAddr           string    `envconfig:"TLS_ADDR" default:":465"`
+	TLSCertificate    string    `envconfig:"TLS_CERTIFICATE"`
+	TLSKey            string    `envconfig:"TLS_KEY"`
 	Driver            string    `envconfig:"DRIVER" required:"true"`
 	AllowInsecureAuth bool      `envconfig:"ALLOW_INSECURE_AUTH"`
 	AuthDisabled      bool      `envconfig:"AUTH_DISABLED"`
@@ -77,21 +82,37 @@ func main() {
 
 	be := smtpWrapper.NewBackend(ctx, dr)
 
-	s := smtp.NewServer(be)
-
-	s.Addr = cfg.Addr
-	s.Domain = cfg.Domain
-	s.WriteTimeout = 10 * time.Second
-	s.ReadTimeout = 10 * time.Second
-	s.MaxMessageBytes = cfg.MaxMessageBytes
-	s.MaxRecipients = cfg.MaxRecipients
-	s.AllowInsecureAuth = cfg.AllowInsecureAuth
-
 	g, _ := errgroup.WithContext(ctx)
+
+	log.WithFields(log.Fields{
+		"addr":   cfg.Addr,
+		"domain": cfg.Domain,
+	}).Trace("initializing SMTP server ...")
+
+	s, err := newServer(cfg, be)
+	if err != nil {
+		panic(err)
+	}
 
 	g.Go(func() error {
 		return s.ListenAndServe()
 	})
+
+	if cfg.EnableTLS {
+		log.WithFields(log.Fields{
+			"addr":   cfg.TLSAddr,
+			"domain": cfg.Domain,
+		}).Trace("initializing SMTPS server ...")
+
+		ts, err := newTLSServer(cfg, be)
+		if err != nil {
+			panic(err)
+		}
+
+		g.Go(func() error {
+			return ts.ListenAndServeTLS()
+		})
+	}
 
 	g.Go(func() error {
 		http.Handle("/metrics", promhttp.Handler())
@@ -117,4 +138,35 @@ func newDriver(cfg config) (driver.Driver, error) {
 	default:
 		return nil, errors.Errorf("unexpected driver: `%s`", cfg.Driver)
 	}
+}
+
+func newServer(cfg config, be smtp.Backend) (*smtp.Server, error) {
+	s := smtp.NewServer(be)
+
+	s.Addr = cfg.Addr
+	s.Domain = cfg.Domain
+	s.MaxMessageBytes = cfg.MaxMessageBytes
+	s.MaxRecipients = cfg.MaxRecipients
+	s.AllowInsecureAuth = cfg.AllowInsecureAuth
+	s.WriteTimeout = 10 * time.Second
+	s.ReadTimeout = 10 * time.Second
+
+	return s, nil
+}
+
+func newTLSServer(cfg config, be smtp.Backend) (*smtp.Server, error) {
+	keypair, err := tls.X509KeyPair([]byte(cfg.TLSCertificate), []byte(cfg.TLSKey))
+	if err != nil {
+		return nil, err
+	}
+
+	s, err := newServer(cfg, be)
+	if err != nil {
+		return nil, err
+	}
+
+	s.Addr = cfg.TLSAddr
+	s.TLSConfig = &tls.Config{Certificates: []tls.Certificate{keypair}}
+
+	return s, nil
 }
