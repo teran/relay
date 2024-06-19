@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: relay
+  labels:
+    app.kubernetes.io/name: relay
+    app.kubernetes.io/app: relay
+    app.kubernetes.io/app-kind: smtp-server
+spec:
+  ports:
+  - name: smtp
+    port: 25
+    protocol: TCP
+  # - name: smtps
+  #   port: 465
+  #   protocol: TCP
+  selector:
+    app.kubernetes.io/name: relay
+    app.kubernetes.io/app: relay
+    app.kubernetes.io/app-kind: smtp-server
+  type: ClusterIP
