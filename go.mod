@@ -6,7 +6,7 @@ require (
 	github.com/emersion/go-smtp v0.21.3
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/mailgun/mailgun-go/v4 v4.14.0
+	github.com/mailgun/mailgun-go/v4 v4.15.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.1
 	github.com/sirupsen/logrus v1.9.3
