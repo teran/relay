@@ -1,6 +1,6 @@
 module github.com/teran/relay
 
-go 1.22.4
+go 1.23.1
 
 require (
 	github.com/emersion/go-smtp v0.21.3
