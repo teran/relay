@@ -3,7 +3,7 @@ module github.com/teran/relay
 go 1.23.1
 
 require (
-	github.com/emersion/go-smtp v0.22.0
+	github.com/emersion/go-smtp v0.23.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mailgun/mailgun-go/v4 v4.23.0
