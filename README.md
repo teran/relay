@@ -19,7 +19,7 @@ Go's client.
 ```shell
 docker run -it \
   -e RELAY_DRIVER=mailgun \
-  -e RELAY_MAILGUN_API_KEY="<MAILGUN_API_KEY> \
+  -e RELAY_MAILGUN_API_KEY="<MAILGUN_API_KEY>" \
   -e RELAY_DOMAIN="<domain>" \
   -e RELAY_MAILGUN_URL="<url>" \
   -e RELAY_ADDR=:25 \
