@@ -27,9 +27,9 @@ func TestBackend(t *testing.T) {
 	s := smtp.NewServer(be)
 	s.AllowInsecureAuth = true
 
-	defer s.Close()
+	defer func() { _ = s.Close() }()
 
-	go s.Serve(l)
+	go func() { _ = s.Serve(l) }()
 
 	err := sendEmail(
 		l.Addr().String(),
@@ -52,9 +52,9 @@ func TestBackendEmptyMessage(t *testing.T) {
 	s := smtp.NewServer(be)
 	s.AllowInsecureAuth = true
 
-	defer s.Close()
+	defer func() { _ = s.Close() }()
 
-	go s.Serve(l)
+	go func() { _ = s.Serve(l) }()
 
 	err := sendEmail(
 		l.Addr().String(),

@@ -50,5 +50,5 @@ func (m *mailgunImplMock) Send(_ context.Context, msg *mg.Message) (string, stri
 }
 
 func newMgMessage(from, subject, text string, to ...string) *mg.Message {
-	return (&mg.MailgunImpl{}).NewMessage(from, subject, text, to...)
+	return mg.NewMessage(from, subject, text, to...)
 }
