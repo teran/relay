@@ -1,6 +1,6 @@
 module github.com/teran/relay
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/emersion/go-smtp v0.24.0
@@ -11,7 +11,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/sync v0.19.0
+	golang.org/x/sync v0.20.0
 )
 
 require (
