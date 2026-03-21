@@ -29,23 +29,28 @@ func New(client MailgunImpl) driver.Driver {
 }
 
 func (u *mailgun) Send(ctx context.Context, from string, to []string, r io.Reader) error {
+	message := u.client.NewMIMEMessage(io.NopCloser(r))
 	for _, recipient := range to {
-		message := u.client.NewMIMEMessage(io.NopCloser(r), recipient)
-		resp, id, err := u.client.Send(ctx, message)
-
-		log.WithFields(log.Fields{
-			"driver":   "mailgun",
-			"id":       id,
-			"response": resp,
-			"error":    err,
-		}).Infof("Attempting to send mail")
-
-		if err != nil {
+		err := message.AddRecipient(recipient)
+		if (err != nil) {
 			mgMessagesCount.WithLabelValues("failed").Inc()
-			return errors.Wrap(err, "error sending mail")
+			return errors.Wrap(err, "error adding recipient")
 		}
-
-		mgMessagesCount.WithLabelValues("success").Inc()
 	}
+	resp, id, err := u.client.Send(ctx, message)
+
+	log.WithFields(log.Fields{
+		"driver":   "mailgun",
+		"id":       id,
+		"response": resp,
+		"error":    err,
+	}).Infof("Attempting to send mail")
+
+	if err != nil {
+		mgMessagesCount.WithLabelValues("failed").Inc()
+		return errors.Wrap(err, "error sending mail")
+	}
+
+	mgMessagesCount.WithLabelValues("success").Inc()
 	return nil
 }

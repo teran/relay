@@ -14,11 +14,11 @@ import (
 func TestMailgunDriver(t *testing.T) {
 	r := require.New(t)
 
-	mgMsg := newMgMessage("from@example.com", "test message", "test message", "to@example.org")
+	mgMsg := newMgMessage("from@example.com", "test message", "test message")
 
 	mgImpl := &mailgunImplMock{}
 	mgImpl.On(
-		"NewMIMEMessage", []byte("test message"), []string{"to@example.org"},
+		"NewMIMEMessage", []byte("test message"), []string(nil),
 	).Return(mgMsg).Once()
 	mgImpl.On("Send", mgMsg).Return("<resp>", "<id>", nil).Once()
 
