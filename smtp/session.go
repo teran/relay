@@ -39,13 +39,6 @@ func (s *session) Logout() error {
 		"body": string(s.body),
 	}).Debugf("on logout")
 
-	if s.from != "" && len(s.to) > 0 && len(s.body) > 0 {
-		log.Infof("Sending message to: %#v", s.to)
-		return s.d.Send(s.ctx, s.from, s.to, bytes.NewReader(s.body))
-	}
-
-	log.Info("No data provided: nothing to send")
-
 	return nil
 }
 
@@ -66,6 +59,13 @@ func (s *session) Data(r io.Reader) error {
 	}
 
 	s.body = data
+
+	if s.from != "" && len(s.to) > 0 && len(s.body) > 0 {
+		log.Infof("Sending message to: %#v", s.to)
+		return s.d.Send(s.ctx, s.from, s.to, bytes.NewReader(s.body))
+	}
+
+	log.Info("No data provided: nothing to send")
 
 	return nil
 }
